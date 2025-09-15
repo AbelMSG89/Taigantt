@@ -19,7 +19,7 @@ export function Dashboard() {
     const fetchProjects = async () => {
       try {
         setIsLoading(true);
-        const projectsList = await ProjectsService.getProjects({
+        const projectsList = await ProjectsService.getMyUserProjects({
           slight: true,
           order_by: 'user_order'
         });

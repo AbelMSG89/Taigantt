@@ -108,7 +108,7 @@ export interface Project {
 }
 
 export interface ProjectsListParams {
-  member?: number;
+  member?: string;
   order_by?: string;
   slight?: boolean;
 }

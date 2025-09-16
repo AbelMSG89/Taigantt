@@ -1,5 +1,5 @@
-import { apiClient } from '../api';
-import type { LoginRequest, LoginResponse } from '../types';
+import { apiClient } from '../../../lib/api';
+import type { LoginRequest, LoginResponse } from '@/features/auth/models/auth.model';
 
 export class AuthService {
   static async normalLogin(credentials: Omit<LoginRequest, 'type'>): Promise<LoginResponse> {

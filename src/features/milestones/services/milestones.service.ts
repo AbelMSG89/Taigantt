@@ -1,5 +1,5 @@
-import { apiClient } from '../api';
-import type { Milestone, MilestonesListParams } from '../types';
+import { apiClient } from '../../../lib/api';
+import type { Milestone, MilestonesListParams } from '@/features/milestones/models/milestones.model';
 
 export class MilestonesService {
   static async getMilestones(params?: MilestonesListParams): Promise<Milestone[]> {

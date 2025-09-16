@@ -76,12 +76,14 @@
   --sidebar-ring: oklch(0.709 0.01 56.259);
 }
 
-#root {
+.min-dvh-screen {
   min-height: 100dvh;
-  display: grid;
-  justify-content: center;
-  align-items: center;
 }
+
+.grid-rows-layout {
+  grid-template-rows: auto 1fr auto;
+}
+
 
 .dark {
   --background: oklch(0.147 0.004 49.25);

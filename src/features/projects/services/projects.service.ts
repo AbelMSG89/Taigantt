@@ -1,6 +1,6 @@
-import { apiClient } from '../api';
-import type { Project, ProjectsListParams } from '../types';
-import { AuthService } from './auth';
+import { apiClient } from '../../../lib/api';
+import type { Project, ProjectsListParams } from '../../../lib/types';
+import { AuthService } from '../../auth/services/auth.service';
 
 export class ProjectsService {
   static async getProjects(params?: ProjectsListParams): Promise<Project[]> {

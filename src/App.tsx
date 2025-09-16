@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router";
 import { LoginForm } from "./components/LoginForm";
 import { Dashboard } from "./components/Dashboard";
+import { MilestonesView } from "./components/MilestonesView";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthService } from "./features/auth/services/auth.service";
 
@@ -25,6 +26,15 @@ function App() {
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/projects/:projectId/milestones"
+        element={
+          <ProtectedRoute>
+            <MilestonesView />
           </ProtectedRoute>
         }
       />

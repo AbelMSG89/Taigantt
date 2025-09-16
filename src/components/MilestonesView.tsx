@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router";
 import { MilestonesService } from "@/features/milestones/services/milestones.service";
+import { ProjectsService } from "@/features/projects/services/projects.service";
 import type { Project } from "@/features/projects/models/projects.model";
 import type { Milestone } from "@/features/milestones/models/milestones.model";
 import { Button } from "@/components/ui/button";
@@ -21,25 +23,55 @@ import MainLayout from "@/layouts/MainLayout";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 
 interface MilestonesViewProps {
-  project: Project;
-  onBackToProjects: () => void;
+  project?: Project;
+  onBackToProjects?: () => void;
 }
 
 export function MilestonesView({
-  project,
+  project: propProject,
   onBackToProjects,
 }: MilestonesViewProps) {
+  const { projectId } = useParams();
+  const navigate = useNavigate();
+  const [project, setProject] = useState<Project | null>(propProject || null);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchMilestones = async () => {
+    const fetchData = async () => {
       try {
         setIsLoading(true);
         setError(null);
+        
+        let currentProject = propProject;
+        
+        // If we don't have a project from props, try to get it from URL params
+        if (!currentProject && projectId) {
+          try {
+            const projects = await ProjectsService.getMyUserProjects({
+              slight: true,
+              order_by: "user_order",
+            });
+            currentProject = projects.find(p => p.id.toString() === projectId);
+            if (!currentProject) {
+              setError("Project not found");
+              return;
+            }
+            setProject(currentProject);
+          } catch (err: any) {
+            setError(err.message || "Error loading project");
+            return;
+          }
+        }
+        
+        if (!currentProject) {
+          setError("No project specified");
+          return;
+        }
+
         const projectMilestones = await MilestonesService.getProjectMilestones(
-          project.id,
+          currentProject.id,
           false
         );
         setMilestones(projectMilestones);
@@ -51,8 +83,8 @@ export function MilestonesView({
       }
     };
 
-    fetchMilestones();
-  }, [project.id]);
+    fetchData();
+  }, [propProject, projectId]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Not set";
@@ -74,8 +106,14 @@ export function MilestonesView({
 
     const fetchMilestones = async () => {
       try {
+        const currentProject = project || propProject;
+        if (!currentProject) {
+          setError("No project available to refresh");
+          return;
+        }
+        
         const projectMilestones = await MilestonesService.getProjectMilestones(
-          project.id,
+          currentProject.id,
           false
         );
         setMilestones(projectMilestones);
@@ -89,11 +127,43 @@ export function MilestonesView({
 
     fetchMilestones();
   };
+  
+  const handleBackToProjects = () => {
+    if (onBackToProjects) {
+      onBackToProjects();
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
+  const currentProject = project || propProject;
+  
+  if (!currentProject && !isLoading) {
+    return (
+      <MainLayout>
+        <div className="flex justify-center items-center min-h-64">
+          <Card>
+            <CardHeader>
+              <CardTitle>Project Not Found</CardTitle>
+              <CardDescription>
+                The requested project could not be found.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={() => navigate('/dashboard')} variant="outline">
+                Go to Dashboard
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
       <div className="flex justify-between items-center gap-4">
-        <Button onClick={onBackToProjects} variant="outline" size="sm">
+        <Button onClick={handleBackToProjects} variant="outline" size="sm">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Projects
         </Button>
@@ -111,7 +181,7 @@ export function MilestonesView({
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-stone-900 mb-6">
-          {project.name}
+          {currentProject?.name}
         </h1>
         <h2 className="text-2xl font-semibold text-stone-800 mb-4">
           Project Milestones

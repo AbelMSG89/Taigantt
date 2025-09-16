@@ -178,11 +178,15 @@ export function GanttViewPage() {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return null;
+  
+      date.setDate(date.getDate() + 1);
+  
       return date.toISOString().split("T")[0];
     } catch {
       return null;
     }
   };
+  
 
   const getStartDate = (userStory: UserStory) => {
     const userStoryValues = customAttributeData.values[userStory.id];

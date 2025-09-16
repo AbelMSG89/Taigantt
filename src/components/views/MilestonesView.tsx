@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { MilestonesService } from "@/features/milestones/services/milestones.service";
 import { ProjectsService } from "@/features/projects/services/projects.service";
-import type { Project } from "@/features/projects/models/projects.model";
-import type { Milestone } from "@/features/milestones/models/milestones.model";
+import type { Project } from "@/features/projects/models/projects";
+import type { Milestone } from "@/features/milestones/models/milestones";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,7 +20,7 @@ import {
   AlertCircleIcon,
 } from "lucide-react";
 import MainLayout from "@/layouts/MainLayout";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 
 interface MilestonesViewProps {
   project?: Project;
@@ -46,7 +46,6 @@ export function MilestonesView({
         
         let currentProject = propProject;
         
-        // If we don't have a project from props, try to get it from URL params
         if (!currentProject && projectId) {
           try {
             const projects = await ProjectsService.getMyUserProjects({
@@ -95,9 +94,8 @@ export function MilestonesView({
     const total = milestone.total_points || 0;
     const closed = milestone.closed_points || 0;
     if (total <= 0) return 0;
-    // calculate percent and round to 2 decimals
     const percent = (closed / total) * 100;
-    return Math.round(percent * 100) / 100; // two decimals
+    return Math.round(percent * 100) / 100;
   };
   
   const handleRefresh = () => {
@@ -134,6 +132,10 @@ export function MilestonesView({
     } else {
       navigate('/dashboard');
     }
+  };
+
+  const handleMilestoneClick = (milestone: Milestone) => {
+    navigate(`/projects/${currentProject?.id}/milestones/${milestone.id}/gantt`);
   };
 
   const currentProject = project || propProject;
@@ -187,103 +189,104 @@ export function MilestonesView({
           Project Milestones
         </h2>
 
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[...Array(4)].map((_, i) => (
-              <Card key={i} className="animate-pulse min-w-60 min-h-56">
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[...Array(4)].map((_, i) => (
+                  <Card key={i} className="animate-pulse min-w-60 min-h-56">
+                    <CardHeader>
+                      <div className="h-6 bg-stone-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-4 bg-stone-200 rounded w-1/2"></div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-4 bg-stone-200 rounded w-full mb-2"></div>
+                      <div className="h-4 bg-stone-200 rounded w-2/3"></div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : milestones.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {milestones.map((milestone) => (
+                  <Card
+                    key={milestone.id}
+                    className="hover:shadow-lg transition-shadow min-w-60 min-h-56 cursor-pointer"
+                    onClick={() => handleMilestoneClick(milestone)}
+                  >
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Target className="h-5 w-5" />
+                        {milestone.name}
+                      </CardTitle>
+                      <CardDescription className="text-sm">
+                        {milestone.closed ? (
+                          <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
+                            Closed
+                          </span>
+                        ) : (
+                          <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                            Active
+                          </span>
+                        )}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm text-stone-600">
+                          <Calendar className="h-4 w-4" />
+                          <span>
+                            {formatDate(milestone.estimated_start)} -{" "}
+                            {formatDate(milestone.estimated_finish)}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-stone-600">Story Points:</span>
+                          <span className="font-medium">
+                            {milestone.closed_points || 0} /{" "}
+                            {milestone.total_points || 0}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm text-stone-600">
+                          <Users className="h-4 w-4" />
+                          <span>{milestone.user_stories.length} User Stories</span>
+                        </div>
+
+                        <p>
+                          {getCompletionPercent(milestone).toFixed(2)}% Complete
+                        </p>
+
+                        {milestone.total_points && milestone.total_points > 0 && (
+                          <div className="w-full bg-stone-200 rounded-full h-2">
+                            <div
+                              className="bg-blue-600 h-2 rounded-full"
+                              style={{
+                                width: `${getCompletionPercent(milestone)}%`,
+                              }}
+                            ></div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
                 <CardHeader>
-                  <div className="h-6 bg-stone-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-4 bg-stone-200 rounded w-1/2"></div>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-4 bg-stone-200 rounded w-full mb-2"></div>
-                  <div className="h-4 bg-stone-200 rounded w-2/3"></div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : milestones.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {milestones.map((milestone) => (
-              <Card
-                key={milestone.id}
-                className="hover:shadow-lg transition-shadow  min-w-60 min-h-56"
-              >
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Target className="h-5 w-5" />
-                    {milestone.name}
-                  </CardTitle>
-                  <CardDescription className="text-sm">
-                    {milestone.closed ? (
-                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
-                        Closed
-                      </span>
-                    ) : (
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-                        Active
-                      </span>
-                    )}
+                  <CardTitle>No Active Milestones</CardTitle>
+                  <CardDescription>
+                    This project doesn't have any active milestones yet.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm text-stone-600">
-                      <Calendar className="h-4 w-4" />
-                      <span>
-                        {formatDate(milestone.estimated_start)} -{" "}
-                        {formatDate(milestone.estimated_finish)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-stone-600">Story Points:</span>
-                      <span className="font-medium">
-                        {milestone.closed_points || 0} /{" "}
-                        {milestone.total_points || 0}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-sm text-stone-600">
-                      <Users className="h-4 w-4" />
-                      <span>{milestone.user_stories.length} User Stories</span>
-                    </div>
-
-                    <p>
-                      {getCompletionPercent(milestone).toFixed(2)}% Complete
-                    </p>
-
-                    {milestone.total_points && milestone.total_points > 0 && (
-                      <div className="w-full bg-stone-200 rounded-full h-2">
-                        <div
-                          className="bg-blue-600 h-2 rounded-full"
-                          style={{
-                            width: `${getCompletionPercent(milestone)}%`,
-                          }}
-                        ></div>
-                      </div>
-                    )}
-                  </div>
+                  <Button onClick={handleRefresh} variant="outline">
+                    Refresh
+                  </Button>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
-        ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle>No Active Milestones</CardTitle>
-              <CardDescription>
-                This project doesn't have any active milestones yet.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={handleRefresh} variant="outline">
-                Refresh
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-      </div>
     </MainLayout>
   );
 }

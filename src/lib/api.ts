@@ -1,19 +1,19 @@
-import axios from 'axios';
-import type { AxiosInstance, AxiosResponse } from 'axios';
-
-const API_BASE_URL = 'https://api.taiga.io/api/v1';
+import axios from "axios";
+import type { AxiosInstance, AxiosResponse } from "axios";
+import { STORAGE_KEYS } from "@/constants/storage";
+import { API_BASE_URL, API_TIMEOUT } from "@/constants/api";
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
-  timeout: 10000,
+  timeout: API_TIMEOUT,
 });
 
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -30,7 +30,7 @@ apiClient.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('auth_token');
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
     }
     return Promise.reject(error);
   }

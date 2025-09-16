@@ -1,5 +1,8 @@
-import { apiClient } from '../../../lib/api';
-import type { LoginRequest, LoginResponse } from '@/features/auth/models/auth.model';
+import { apiClient } from '../../../lib/api.ts';
+import type { LoginRequest, LoginResponse } from '@/features/auth/models/auth';
+import { setAuthData, clearAuthData, isAuthenticated as checkIsAuthenticated, getStoredToken, getStoredUserId } from '@/utils/auth';
+import { handleApiError } from '@/utils/error';
+import { API_ENDPOINTS } from '@/constants/api';
 
 export class AuthService {
   static async normalLogin(credentials: Omit<LoginRequest, 'type'>): Promise<LoginResponse> {
@@ -10,48 +13,33 @@ export class AuthService {
         password: credentials.password,
       };
 
-      const response = await apiClient.post<LoginResponse>('/auth', loginData);
+      const response = await apiClient.post<LoginResponse>(API_ENDPOINTS.AUTH, loginData);
       
       if (response.data.auth_token) {
-        localStorage.setItem('auth_token', response.data.auth_token);
-        localStorage.setItem('id', String(response.data.id));
+        setAuthData(response.data.auth_token, String(response.data.id));
       }
 
       return response.data;
     } catch (error: any) {
-      if (error.response?.status === 401) {
-        const apiError = error.response.data;
-        if (apiError.code === 'invalid_credentials') {
-          throw new Error('No active account found with the given credentials');
-        } else if (apiError.message) {
-          throw new Error(apiError.message);
-        } else {
-          throw new Error('Unauthorized. Please check your credentials.');
-        }
-      } else if (error.response?.data) {
-        throw new Error('Login error. Please try again.');
-      }
-      throw new Error('Connection error. Please try again.');
+      const errorMessage = handleApiError(error);
+      throw new Error(errorMessage);
     }
   }
 
   static logout(): void {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('id');
+    clearAuthData();
   }
 
   static isAuthenticated(): boolean {
-    const token = localStorage.getItem('auth_token');
-    return !!token;
+    return checkIsAuthenticated();
   }
 
   static getToken(): string | null {
-    return localStorage.getItem('auth_token');
+    return getStoredToken();
   }
 
   static getCurrentUserId(): string | null {
-    const id = localStorage.getItem('id');
-    return id ? id : null;
+    return getStoredUserId();
   }
 }
 

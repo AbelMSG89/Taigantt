@@ -1,6 +1,8 @@
 import { apiClient } from '../../../lib/api';
-import type { Project, ProjectsListParams } from '../../../lib/types';
+import type { Project, ProjectsListParams } from '../models/projects';
 import { AuthService } from '../../auth/services/auth.service';
+import { API_ENDPOINTS } from '@/constants/api';
+import { handleApiError } from '@/utils/error';
 
 export class ProjectsService {
   static async getProjects(params?: ProjectsListParams): Promise<Project[]> {
@@ -20,15 +22,13 @@ export class ProjectsService {
       }
 
       const queryString = queryParams.toString();
-      const url = `/projects${queryString ? `?${queryString}` : ''}`;
+      const url = `${API_ENDPOINTS.PROJECTS}${queryString ? `?${queryString}` : ''}`;
       
       const response = await apiClient.get<Project[]>(url);
       return response.data;
     } catch (error: any) {
-      if (error.response?.data) {
-        throw new Error(error.response.data.message || 'Error fetching projects');
-      }
-      throw new Error('Connection error. Please try again.');
+      const errorMessage = handleApiError(error);
+      throw new Error(errorMessage);
     }
   }
 

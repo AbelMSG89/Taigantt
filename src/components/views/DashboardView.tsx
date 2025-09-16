@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { AuthService } from "@/features/auth/services/auth.service";
 import { ProjectsService } from "@/features/projects/services/projects.service";
-import type { Project } from "@/features/projects/models/projects.model";
+import type { Project } from "@/features/projects/models/projects";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,7 +16,9 @@ import {
   AlertCircleIcon,
 } from "lucide-react";
 import MainLayout from "@/layouts/MainLayout";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { LOADING_SKELETON_COUNT } from "@/constants/ui";
+import { formatProjectType, getProjectTypeStyles, truncateTags, formatActivityCount } from "@/utils/formatting";
 
 export function Dashboard() {
   const navigate = useNavigate();
@@ -79,7 +81,7 @@ export function Dashboard() {
 
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
+              {[...Array(LOADING_SKELETON_COUNT)].map((_, i) => (
                 <Card key={i} className="animate-pulse min-w-60 min-h-56">
                   <CardHeader>
                     <div className="h-6 bg-stone-200 rounded w-3/4 mb-2"></div>
@@ -110,35 +112,38 @@ export function Dashboard() {
                       <div className="flex items-center justify-between text-sm text-stone-600">
                         <span>Type:</span>
                         <span
-                          className={`px-2 py-1 rounded-full text-xs ${
-                            project.is_private
-                              ? "bg-red-100 text-red-800"
-                              : "bg-green-100 text-green-800"
-                          }`}
+                          className={`px-2 py-1 rounded-full text-xs ${getProjectTypeStyles(project.is_private)}`}
                         >
-                          {project.is_private ? "Private" : "Public"}
+                          {formatProjectType(project.is_private)}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm text-stone-600">
                         <span>Activity:</span>
-                        <span>{project.total_activity} events</span>
+                        <span>{formatActivityCount(project.total_activity)}</span>
                       </div>
                     </div>
 
                     <div className="mt-4 flex flex-wrap gap-1">
-                      {project.tags.slice(0, 3).map((tag, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                      {project.tags.length > 3 && (
-                        <span className="px-2 py-1 bg-stone-100 text-stone-600 text-xs rounded">
-                          +{project.tags.length - 3} more
-                        </span>
-                      )}
+                      {(() => {
+                        const { displayed, remaining, hasMore } = truncateTags(project.tags);
+                        return (
+                          <>
+                            {displayed.map((tag, index) => (
+                              <span
+                                key={index}
+                                className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                            {hasMore && (
+                              <span className="px-2 py-1 bg-stone-100 text-stone-600 text-xs rounded">
+                                +{remaining} more
+                              </span>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                   </CardContent>
                 </Card>

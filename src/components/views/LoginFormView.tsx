@@ -17,8 +17,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Github, Eye, EyeOff, AlertCircleIcon } from "lucide-react";
 import { AuthService } from "@/features/auth/services/auth.service";
-import type { LoginResponse } from "@/features/auth/models/auth.model";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import type { LoginResponse } from "@/features/auth/models/auth";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import CenteredLayout from "@/layouts/CenteredLayout";
 
 export function LoginForm() {

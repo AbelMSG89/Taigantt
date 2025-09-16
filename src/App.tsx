@@ -1,28 +1,30 @@
 import { Routes, Route, Navigate } from "react-router";
-import { LoginForm } from "./components/LoginForm";
-import { Dashboard } from "./components/Dashboard";
-import { MilestonesView } from "./components/MilestonesView";
+import { LoginForm } from "./components/views/LoginFormView";
+import { Dashboard } from "./components/views/DashboardView";
+import { MilestonesView } from "./components/views/MilestonesView";
+import { GanttViewPage } from "./components/views/GanttView";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthService } from "./features/auth/services/auth.service";
+import { ROUTES } from "@/constants/routes";
 
 function App() {
   return (
     <Routes>
       <Route
-        path="/"
+        path={ROUTES.HOME}
         element={
           AuthService.isAuthenticated() ? (
-            <Navigate to="/dashboard" replace />
+            <Navigate to={ROUTES.DASHBOARD} replace />
           ) : (
-            <Navigate to="/login" replace />
+            <Navigate to={ROUTES.LOGIN} replace />
           )
         }
       />
 
-      <Route path="/login" element={<LoginForm />} />
+      <Route path={ROUTES.LOGIN} element={<LoginForm />} />
 
       <Route
-        path="/dashboard"
+        path={ROUTES.DASHBOARD}
         element={
           <ProtectedRoute>
             <Dashboard />
@@ -39,7 +41,16 @@ function App() {
         }
       />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route
+        path="/projects/:projectId/milestones/:milestoneId/gantt"
+        element={
+          <ProtectedRoute>
+            <GanttViewPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
     </Routes>
   );
 }

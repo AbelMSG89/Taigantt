@@ -24,7 +24,7 @@
   line-height: 14.5px;
   position: relative;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
   font-size: 12px;
   height: var(--gv-grid-height);
   width: 100%;

@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router";
-import Gantt from 'frappe-gantt';
+import Gantt from "frappe-gantt";
 import { MilestonesService } from "@/features/milestones/services/milestones.service";
 import { ProjectsService } from "@/features/projects/services/projects.service";
 import { UserStoryCustomAttributesService } from "@/features/user_stories/services/custom-attributes.service";
 import type { Project } from "@/features/projects/models/projects";
 import type { Milestone } from "@/features/milestones/models/milestones";
 import type { UserStory } from "@/features/user_stories/models/user-stories";
-import type { 
-  UserStoryCustomAttribute, 
-  UserStoryCustomAttributeValues 
+import type {
+  UserStoryCustomAttribute,
+  UserStoryCustomAttributeValues,
 } from "@/features/user_stories/models/custom-attributes";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -26,23 +26,52 @@ export function GanttViewPage() {
   const navigate = useNavigate();
   const ganttRef = useRef<HTMLDivElement>(null);
   const ganttInstance = useRef<any>(null);
-  
+
   const [project, setProject] = useState<Project | null>(null);
   const [milestone, setMilestone] = useState<Milestone | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [customAttributeData, setCustomAttributeData] = useState<CustomAttributeData>({
-    attributes: [],
-    values: {}
-  });
+  const [customAttributeData, setCustomAttributeData] =
+    useState<CustomAttributeData>({
+      attributes: [],
+      values: {},
+    });
   const [ganttLoading, setGanttLoading] = useState(true);
+
+  const useGanttScroll = (ref: React.RefObject<HTMLDivElement | null>) => {
+    useEffect(() => {
+      const element = ref.current;
+      if (!element) return;
+
+      const handleWheelEvent = (event: WheelEvent) => {
+        if (event.shiftKey) {
+          event.preventDefault();
+          event.stopPropagation();
+          element.scrollLeft += event.deltaY;
+        } else {
+          event.stopPropagation();
+        }
+      };
+
+      element.addEventListener('wheel', handleWheelEvent, { 
+        passive: false, 
+        capture: true 
+      });
+
+      return () => {
+        element.removeEventListener('wheel', handleWheelEvent, { capture: true });
+      };
+    }, [ref]);
+  };
+
+  useGanttScroll(ganttRef);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        
+
         if (!projectId || !milestoneId) {
           setError("Project ID and Milestone ID are required");
           return;
@@ -52,7 +81,9 @@ export function GanttViewPage() {
           slight: true,
           order_by: "user_order",
         });
-        const currentProject = projects.find(p => p.id.toString() === projectId);
+        const currentProject = projects.find(
+          (p) => p.id.toString() === projectId
+        );
         if (!currentProject) {
           setError("Project not found");
           return;
@@ -63,7 +94,9 @@ export function GanttViewPage() {
           currentProject.id,
           false
         );
-        const currentMilestone = projectMilestones.find(m => m.id.toString() === milestoneId);
+        const currentMilestone = projectMilestones.find(
+          (m) => m.id.toString() === milestoneId
+        );
         if (!currentMilestone) {
           setError("Milestone not found");
           return;
@@ -82,29 +115,42 @@ export function GanttViewPage() {
 
   useEffect(() => {
     const loadCustomAttributes = async () => {
-      if (!milestone?.user_stories || milestone.user_stories.length === 0 || !project) {
+      if (
+        !milestone?.user_stories ||
+        milestone.user_stories.length === 0 ||
+        !project
+      ) {
         setGanttLoading(false);
         return;
       }
 
       try {
         setGanttLoading(true);
-        
-        const attributes = await UserStoryCustomAttributesService.getProjectCustomAttributes(project.id);
-        
+
+        const attributes =
+          await UserStoryCustomAttributesService.getProjectCustomAttributes(
+            project.id
+          );
+
         const valuesPromises = milestone.user_stories.map(async (userStory) => {
           try {
-            const values = await UserStoryCustomAttributesService.getCustomAttributeValues(userStory.id);
+            const values =
+              await UserStoryCustomAttributesService.getCustomAttributeValues(
+                userStory.id
+              );
             return { userStoryId: userStory.id, values };
           } catch (error) {
-            console.warn(`Failed to load custom attributes for user story ${userStory.id}:`, error);
+            console.warn(
+              `Failed to load custom attributes for user story ${userStory.id}:`,
+              error
+            );
             return { userStoryId: userStory.id, values: null };
           }
         });
 
         const valuesResults = await Promise.all(valuesPromises);
         const valuesMap: Record<number, UserStoryCustomAttributeValues> = {};
-        
+
         valuesResults.forEach(({ userStoryId, values }) => {
           if (values) {
             valuesMap[userStoryId] = values;
@@ -113,10 +159,10 @@ export function GanttViewPage() {
 
         setCustomAttributeData({
           attributes,
-          values: valuesMap
+          values: valuesMap,
         });
       } catch (error) {
-        console.error('Failed to load custom attributes:', error);
+        console.error("Failed to load custom attributes:", error);
       } finally {
         setGanttLoading(false);
       }
@@ -132,7 +178,7 @@ export function GanttViewPage() {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return null;
-      return date.toISOString().split('T')[0];
+      return date.toISOString().split("T")[0];
     } catch {
       return null;
     }
@@ -141,9 +187,12 @@ export function GanttViewPage() {
   const getStartDate = (userStory: UserStory) => {
     const userStoryValues = customAttributeData.values[userStory.id];
     if (userStoryValues) {
-      const startDateAttr = customAttributeData.attributes.find(attr => attr.name === "Start Date");
+      const startDateAttr = customAttributeData.attributes.find(
+        (attr) => attr.name === "Start Date"
+      );
       if (startDateAttr) {
-        const startDate = userStoryValues.attributes_values[startDateAttr.id.toString()];
+        const startDate =
+          userStoryValues.attributes_values[startDateAttr.id.toString()];
         if (startDate) {
           const formattedDate = formatDateForGantt(startDate);
           if (formattedDate) return formattedDate;
@@ -160,12 +209,17 @@ export function GanttViewPage() {
   };
 
   useEffect(() => {
-    if (!ganttLoading && ganttRef.current && milestone?.user_stories && milestone.user_stories.length > 0) {
+    if (
+      !ganttLoading &&
+      ganttRef.current &&
+      milestone?.user_stories &&
+      milestone.user_stories.length > 0
+    ) {
       const tasks = milestone.user_stories
         .map((userStory) => {
           const startDate = getStartDate(userStory);
           const endDate = formatDateForGantt(userStory.due_date);
-          
+
           if (!startDate || !endDate || !userStory.subject || !userStory.id) {
             return null;
           }
@@ -175,29 +229,29 @@ export function GanttViewPage() {
             name: userStory.subject.trim() || `Story ${userStory.id}`,
             start: startDate,
             end: endDate,
-            progress: getProgress(userStory)
+            progress: getProgress(userStory),
           };
         })
-        .filter(task => task !== null);
+        .filter((task) => task !== null);
 
       if (tasks.length > 0) {
-        console.log('Creating Gantt with tasks:', tasks);
+        console.log("Creating Gantt with tasks:", tasks);
         try {
           if (ganttInstance.current) {
             ganttInstance.current = null;
           }
 
           if (ganttRef.current) {
-            ganttRef.current.innerHTML = '';
+            ganttRef.current.innerHTML = "";
           }
 
           ganttInstance.current = new Gantt(ganttRef.current, tasks, {
-            view_mode: 'Day',
-            date_format: 'YYYY-MM-DD'
+            view_mode: "Day",
+            date_format: "YYYY-MM-DD",
           });
         } catch (error) {
-          console.error('Error creating Gantt chart:', error);
-          console.error('Tasks data:', tasks);
+          console.error("Error creating Gantt chart:", error);
+          console.error("Tasks data:", tasks);
         }
       }
     }
@@ -261,25 +315,33 @@ export function GanttViewPage() {
     if (!milestone?.user_stories || milestone.user_stories.length === 0) {
       return (
         <div className="text-center py-8">
-          <div className="text-stone-500">No user stories to display in Gantt chart</div>
+          <div className="text-stone-500">
+            No user stories to display in Gantt chart
+          </div>
         </div>
       );
     }
 
     return (
-      <div className="w-full">
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-stone-900">
-            {milestone?.name || 'Milestone'} - Gantt Chart
-          </h3>
-          <p className="text-sm text-stone-600">
-            Timeline view of user stories with start dates and due dates
-          </p>
-        </div>
-        <div 
-          id="gantt" 
+      <div className="w-full flex flex-col items-center">
+        <h3 className="text-lg font-semibold text-stone-900">
+          {milestone?.name || "Milestone"} - Gantt Chart
+        </h3>
+        <p className="text-sm text-stone-600 mb-4">
+          Timeline view of user stories with start dates and due dates
+        </p>
+        <p className="text-xs text-stone-500 mb-4">
+          💡 Use scroll wheel for vertical scrolling • Shift + scroll wheel for horizontal scrolling
+        </p>
+        <div
+          id="gantt"
           ref={ganttRef}
-          className="overflow-x-auto border border-stone-200 rounded-lg"
+          className="border border-stone-200 rounded-lg overflow-auto max-w-screen"
+          style={{ 
+            maxHeight: '70vh',
+            minHeight: '400px',
+            width: '100%'
+          }}
         />
       </div>
     );

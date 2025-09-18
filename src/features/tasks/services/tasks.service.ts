@@ -5,7 +5,7 @@ import type {
   UpdateTaskRequest,
   GetTasksOptions,
   TasksListResponse 
-} from "../models/tasks";
+} from "../models/tasks.models";
 
 export class TasksService {
   private static readonly BASE_URL = "/tasks";

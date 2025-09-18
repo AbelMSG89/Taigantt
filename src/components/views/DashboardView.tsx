@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { AuthService } from "@/features/auth/services/auth.service";
 import { ProjectsService } from "@/features/projects/services/projects.service";
-import type { Project } from "@/features/projects/models/projects";
+import type { Project } from "@/features/projects/models/projects.models";
 import { Button } from "@/components/ui/button";
 import {
   Card,

@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/api";
-import type { UserStory } from "../models/user-stories";
+import type { UserStory } from "../models/user-stories.models";
 import { UserStoryCustomAttributesService } from "./custom-attributes.service";
 
 export interface GetUserStoriesOptions {

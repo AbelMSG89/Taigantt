@@ -1,5 +1,5 @@
 import { apiClient } from '../../../lib/api';
-import type { Project, ProjectsListParams } from '../models/projects';
+import type { Project, ProjectsListParams } from '../models/projects.models';
 import { AuthService } from '../../auth/services/auth.service';
 import { API_ENDPOINTS } from '@/constants/api';
 import { handleApiError } from '@/utils/error';

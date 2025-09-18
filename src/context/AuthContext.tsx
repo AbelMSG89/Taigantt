@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { AuthUser, LoginRequest } from '@/features/auth/models/auth';
+import type { AuthUser, LoginRequest } from '@/features/auth/models/auth.models';
 import { AuthService } from '@/features/auth/services/auth.service';
 import { isAuthenticated as checkAuth, clearAuthData } from '@/utils/auth';
 

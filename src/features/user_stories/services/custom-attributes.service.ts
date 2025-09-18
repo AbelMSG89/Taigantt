@@ -3,7 +3,7 @@ import type {
   UserStoryCustomAttribute,
   UserStoryCustomAttributeValues,
   UpdateCustomAttributeValuesRequest,
-} from "../models/custom-attributes";
+} from "../models/custom-attributes.models";
 
 export class UserStoryCustomAttributesService {
   private static readonly CAV_URL = "/userstories/custom-attributes-values";

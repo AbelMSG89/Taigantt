@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { MilestonesService } from "@/features/milestones/services/milestones.service";
 import { ProjectsService } from "@/features/projects/services/projects.service";
-import type { Project } from "@/features/projects/models/projects";
-import type { Milestone } from "@/features/milestones/models/milestones";
+import type { Project } from "@/features/projects/models/projects.models";
+import type { Milestone } from "@/features/milestones/models/milestones.models";
 import { Button } from "@/components/ui/button";
 import {
   Card,

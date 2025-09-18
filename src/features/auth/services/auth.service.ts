@@ -1,5 +1,5 @@
 import { apiClient } from '../../../lib/api.ts';
-import type { LoginRequest, LoginResponse } from '@/features/auth/models/auth';
+import type { LoginRequest, LoginResponse } from '@/features/auth/models/auth.models.ts';
 import { setAuthData, clearAuthData, isAuthenticated as checkIsAuthenticated, getStoredToken, getStoredUserId } from '@/utils/auth';
 import { handleApiError } from '@/utils/error';
 import { API_ENDPOINTS } from '@/constants/api';

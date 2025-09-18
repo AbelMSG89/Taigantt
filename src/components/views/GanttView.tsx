@@ -4,13 +4,13 @@ import Gantt from "frappe-gantt";
 import { MilestonesService } from "@/features/milestones/services/milestones.service";
 import { ProjectsService } from "@/features/projects/services/projects.service";
 import { UserStoryCustomAttributesService } from "@/features/user_stories/services/custom-attributes.service";
-import type { Project } from "@/features/projects/models/projects";
-import type { Milestone } from "@/features/milestones/models/milestones";
-import type { UserStory } from "@/features/user_stories/models/user-stories";
+import type { Project } from "@/features/projects/models/projects.models";
+import type { Milestone } from "@/features/milestones/models/milestones.models";
+import type { UserStory } from "@/features/user_stories/models/user-stories.models";
 import type {
   UserStoryCustomAttribute,
   UserStoryCustomAttributeValues,
-} from "@/features/user_stories/models/custom-attributes";
+} from "@/features/user_stories/models/custom-attributes.models";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import MainLayout from "@/layouts/MainLayout";

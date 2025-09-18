@@ -1,5 +1,5 @@
-import type { UserStory } from '@/features/user_stories/models/user-stories';
-import type { Milestone } from '@/features/milestones/models/milestones';
+import type { UserStory } from '@/features/user_stories/models/user-stories.models';
+import type { Milestone } from '@/features/milestones/models/milestones.models';
 import { GANTT_CONFIG } from '@/constants/gantt';
 
 export const formatUserStoryForGantt = (userStory: UserStory) => {

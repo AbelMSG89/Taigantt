@@ -1,4 +1,4 @@
-import type { UserStory } from "../../user_stories/models/user-stories";
+import type { UserStory } from "../../user_stories/models/user-stories.models";
 
 export interface Milestone {
   id: number;

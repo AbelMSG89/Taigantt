@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router";
-import Gantt from "frappe-gantt";
+// @ts-ignore
+import Gantt from "../../lib/gantt";
 import { MilestonesService } from "@/features/milestones/services/milestones.service";
 import { ProjectsService } from "@/features/projects/services/projects.service";
 import { UserStoryCustomAttributesService } from "@/features/user_stories/services/custom-attributes.service";
@@ -14,7 +15,6 @@ import type {
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import MainLayout from "@/layouts/MainLayout";
-import "@/styles/gantt.css";
 
 interface CustomAttributeData {
   attributes: UserStoryCustomAttribute[];

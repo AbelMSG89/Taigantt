@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 // @ts-ignore
-import Gantt from "../../lib/gantt";
+import Gantt from "../../lib/frappe-gantt";
 import { MilestonesService } from "@/features/milestones/services/milestones.service";
 import { ProjectsService } from "@/features/projects/services/projects.service";
 import { UserStoryCustomAttributesService } from "@/features/user_stories/services/custom-attributes.service";
